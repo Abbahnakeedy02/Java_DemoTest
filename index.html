@@ -1,1293 +1,552 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-       
     <meta charset="UTF-8">
-       
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Entrepreneurship Quiz Demo</title>
-           <link rel="icon" type="image/png" href="icon.png">
-
+    <title>Java Objective Quiz (170 Questions)</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-        /* Custom styles for Inter font and better aesthetics */
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
         }
-
-        .quiz-card {
-            background-color: #ffffff;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-        }
-
-        /* Custom button styling for hover and focus */
+        /* Custom styling for options to handle code snippets better */
         .option-button {
+            white-space: pre-wrap; /* Allows text to wrap naturally */
+            text-align: left;
+            padding: 1rem;
+            line-height: 1.5;
             transition: all 0.15s ease-in-out;
+            cursor: pointer;
         }
-
-        .option-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .option-button:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .correct-answer {
-            background-color: #10b981 !important;
-            /* Green 500 */
-            color: white !important;
-        }
-
-        .wrong-answer {
-            background-color: #ef4444 !important;
-            /* Red 500 */
-            color: white !important;
-        }
-        p {
-            align-self: center;
-        }
+        
     </style>
 </head>
+<body class="min-h-screen flex items-start justify-center p-4 sm:p-8">
 
-<body>
+    <!-- Quiz Container Card -->
+    <div id="quiz-container" class="w-full max-w-xl bg-white rounded-xl shadow-2xl p-6 sm:p-8 space-y-6 mt-10">
 
-        <div id="loading-overlay" class="fixed inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="text-xl font-semibold text-gray-700">Initializing App...</div>
-            
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-800">Java Objective Quiz (170 Qs)</h1>
+            <div id="user-info" class="flex justify-between text-sm text-gray-500 border-b pb-3">
+                <span>User ID: Loading...</span>
+                <span id="score-display">Current Score: 0 / 170</span>
             </div>
+        </header>
 
-        <div id="quiz-container" class="quiz-card p-6 md:p-10 rounded-xl hidden">
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Entrepreneurship Quiz Demo</h1>
+        <!-- Jump to Question Section -->
+        <div class="flex flex-col sm:flex-row gap-2">
+            <input type="number" id="jump-input" placeholder="Go to Q# (1-170)" min="1" max="170" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+            <button id="jump-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">
+                Jump
+            </button>
+        </div>
 
-                        <div class="mb-4 space-y-3">
-                        <div class="text-sm text-gray-500 flex justify-between">
-                                <p>User ID: <span id="user-id"
-                        class="font-mono text-xs bg-gray-100 px-1 py-0.5 rounded">...</span></p>
-                                <p>High Score: <span id="high-score" class="font-bold text-indigo-600">0 / 0</span></p>
-                            </div>
-                        
-                                    <div
-                class="flex items-center space-x-2 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                                <input type="number" id="jump-input" placeholder="Go to Q#" min="1"
-                    class="w-24 p-2 text-sm rounded-lg border border-indigo-300 focus:ring-indigo-500 focus:border-indigo-500">
-                                <button id="jump-button"
-                    class="bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-indigo-600 transition duration-150 shadow-md">
-                                        Jump
-                                    </button>
-                                <p id="jump-feedback" class="text-xs text-red-600 ml-2"></p>
-                            </div>
-                    </div>
+        <!-- Question Display Area -->
+        <div id="question-area" class="space-y-4">
+            <div id="question-number" class="text-blue-600 font-bold text-lg">Choose Option To Continue...</div>
+            <p id="question-text" class="text-lg text-gray-800 whitespace-pre-wrap leading-relaxed"></p>
+        </div>
 
+        <!-- Options Section -->
+        <div id="options-container" class="space-y-3">
+            <!-- Options will be dynamically inserted here -->
+        </div>
 
-                        <div id="question-area">
-                        <p id="question-text" class="text-xl font-semibold mb-6 text-gray-700">Question goes here...</p>
-                        <div id="options-container" class="space-y-3">
-                                            </div>
-                    </div>
-                    <p id="feedback-message" class="text-lg font-bold h-6 mb-4 md:mb-0"></p><br>
+        <!-- Feedback and Score Section -->
+        <div id="feedback-area" class="min-h-[50px] space-y-2">
+            <!-- Feedback message (e.g., Wrong! Correct answer highlighted in green.) -->
+            <p id="feedback-message" class="font-semibold text-red-600 hidden"></p>
+        </div>
 
-                        <div class="mt-6 flex flex-col md:flex-row items-center justify-between">
-            <button id="prev-button"
-                class="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-500 transition duration-150 shadow-md mb-2 md:mb-0"
-                disabled>
-                                    Previous Question
-                                </button>
-                        
-                        <button id="next-button"
-                class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition duration-150 shadow-md"
-                disabled>
-                                Next Question
-                            </button><br>
-            <button id="end-button"
-                class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-150 shadow-md">
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between flex-wrap gap-3 pt-2 border-t mt-4">
+            <button id="prev-btn" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150" disabled>
+                Previous Question
+            </button>
+            <button id="next-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                Next Question
+            </button>
+            <button id="end-quiz-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
                 End Quiz
             </button>
-                        <button id="restart-button"
-                class="hidden bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-150 shadow-md">
-                                Start New Quiz
-                            </button>
-                
         </div>
 
-                        <div id="results-screen" class="hidden text-center mt-8">
-                        <h2 class="text-4xl font-extrabold text-indigo-600 mb-3">Quiz Complete!</h2>
-                        <p class="text-2xl text-gray-700">Your Final Score: <span id="final-score"
-                    class="text-indigo-600 font-bold">0 / 0</span></p>
-            <p class="text-lg text-gray-700 mt-2">Questions Attended: <span id="questions-attended"
-                    class="font-bold">0</span></p>
-                        <p id="score-update-message" class="text-md mt-2 text-gray-500"></p>
-                   
-        </div>
+        <footer class="text-center text-xs text-gray-400 mt-4 pt-4 border-t">
+            Powered by El_Nakeedy Design Hub
+        </footer>
 
-            
-    <footer><p>Powered by <b>El_Nakeedy Hub Dukku</b></p><footer></div>
-            
+    </div>
 
-           
+    <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables provided by the environment
+        // Global Firebase variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db, auth, userId = null;
-        let isAuthReady = false;
+        let db, auth, userId = 'simulated-user';
 
-        // Quiz State
-        let currentQuestionIndex = 0; // 0-based index
-        let score = 0;
-        let questionsAttended = 0;
-        let highscore = { score: 0, total: 0 };
-        let answered = false;
+        // --- Firebase Initialization and Authentication ---
+        const initFirebase = async () => {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
 
-        // --- START OF QUESTIONS ARRAY ---
-        const questions = [
-            {
-                question: "According to the notes, the controversy surrounding entrepreneurship theory has:",
-                options: { A: "Been completely resolved.", B: "Generated vigorous research interest.", C: "Led to a single unifying theory.", D: "Made the concept less important." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Three Dimensions of Entrepreneurship\" framework categorizes definitions based on:",
-                options: { A: "Age, gender, and location of the entrepreneur.", B: "Processes, behaviors, and outcomes.", C: "Risk, reward, and innovation.", D: "Product, price, and place." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A definition focusing on \"the competitive behaviors that drive the market process\" falls under the dimension of:",
-                options: { A: "Processes.", B: "Behaviors.", C: "Outcomes.", D: "Functions." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Casson's Economic Theory suggests that entrepreneurship arises from:",
-                options: { A: "Religious beliefs.", B: "Conducive economic conditions.", C: "A high need for achievement.", D: "Random chance." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Functional Perspective\" of entrepreneurship originated in the field of:",
-                options: { A: "Psychology.", B: "Economics.", C: "Sociology.", D: "Management." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Strategic Entrepreneurship within a corporation involves innovations that are:",
-                options: { A: "Always low-risk.", B: "Adopted in the firm's pursuit of competitive advantage.", C: "Limited to product offerings only.", D: "Independent of the firm's strategy." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A factor that has created a need for Corporate Entrepreneurship is:",
-                options: { A: "Rapid growth in the number of new and sophisticated competitors.", B: "Decreased global competition.", C: "Increased trust in traditional management methods.", D: "An influx of talented people into corporations." },
-                correctAnswer: "A"
-            },
-            {
-                question: "The desire for quick returns and application of fraudulent practices are:",
-                options: { A: "Encouraged for sustainable growth.", B: "Inimical to sustainable entrepreneurship growth.", C: "Signs of good business acumen.", D: "Recommended for new entrepreneurs." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Nigerian economic system, as described in the notes, is:",
-                options: { A: "A purely socialist system.", B: "A capitalist system where market forces govern.", C: "A mixed economic system with heavy government control in all sectors.", D: "A traditional economy." },
-                correctAnswer: "B"
-            },
-            {
-                question: "What is the primary distinction between an entrepreneur and an intrapreneur?",
-                options: { A: "An entrepreneur works alone, while an intrapreneur works in a team.", B: "An entrepreneur starts a new venture, while an intrapreneur innovates within an existing organization.", C: "An entrepreneur is profit-oriented, while an intrapreneur is not.", D: "An entrepreneur bears all the risks, while an intrapreneur does not bear the risks associated with the innovation." },
-                correctAnswer: "D"
-            },
-            {
-                question: "According to Schumpeter's Innovation Theory, entrepreneurship occurs when the entrepreneur:",
-                options: { A: "Takes on uninsurable risks.", B: "Is driven by a need for achievement.", C: "Has access to sufficient capital.", D: "Introduces a new product or method of production." },
-                correctAnswer: "D"
-            },
-            {
-                question: "Knight's Risk-bearing Theory posits that an entrepreneur earns profit as a reward for:",
-                options: { A: "Innovation.", B: "Bearing uninsurable risks.", C: "Conforming to societal expectations.", D: "Effective management." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Weber's Sociological Theory suggests that entrepreneurship is primarily driven by:",
-                options: { A: "Government policies.", B: "Social culture, beliefs, and customs.", C: "Personal financial gain.", D: "Technological advancement." },
-                correctAnswer: "B"
-            },
-            {
-                question: "McClelland's Theory of Achievement Motivation states that entrepreneurship is driven by the need for:",
-                options: { A: "Affiliation and power.", B: "Achievement and power.", C: "Security and affiliation.", D: "Power and security." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Behavioral Perspective\" of entrepreneurship focuses on:",
-                options: { A: "The personality traits of the entrepreneur.", B: "What entrepreneurs do and the processes they follow.", C: "The economic outcomes of entrepreneurial activities.", D: "The functional role of the entrepreneur in the economy." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Corporate Entrepreneurship is best defined as:",
-                options: { A: "A large corporation taking over small businesses.", B: "The process of a company going public.", C: "A process of creating new organizations or instigating renewal/innovation within an existing organization.", D: "The ethical practices of a corporation." },
-                correctAnswer: "C"
-            },
-            {
-                question: "Which of the following is NOT a common barrier to entrepreneurial practice mentioned in the notes?",
-                options: { A: "Inadequate access to funds.", B: "Lack of adequate planning.", C: "Excessive government support.", D: "Absence of infrastructural facilities." },
-                correctAnswer: "C"
-            },
-            {
-                question: "PESTEL analysis is a framework used to analyze the:",
-                options: { A: "Internal strengths of a business.", B: "External business environment.", C: "Financial viability of a project.", D: "Personal traits of an entrepreneur." },
-                correctAnswer: "B"
-            },
-            {
-                question: "In the Nigerian context, which PESTEL factor is characterized by issues like kidnapping and corruption?",
-                options: { A: "Economic", B: "Political", C: "Social", D: "Legal" },
-                correctAnswer: "B"
-            },
-            {
-                question: "A large and growing population in Nigeria represents which type of PESTEL factor?",
-                options: { A: "Political", B: "Economic", C: "Social/Demographic", D: "Technological" },
-                correctAnswer: "C"
-            },
-            {
-                question: "The primary purpose of a SWOT analysis is to:",
-                options: { A: "Write a business plan.", B: "Identify internal strengths/weaknesses and external opportunities/threats.", C: "Secure a bank loan.", D: "Register a business name." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of these is a common fear that hinders entrepreneurial undertaking?",
-                options: { A: "Fear of excessive profit.", B: "Fear of failure.", C: "Fear of having too many employees.", D: "Fear of market stability." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Creativity is defined as:",
-                options: { A: "The strict adherence to established rules.", B: "The invention or origination of any new thing that has value.", C: "The process of managing a business.", D: "The analysis of market trends." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is a characteristic of a creative personality according to Csikszentmihalyi?",
-                options: { A: "They are always extroverted.", B: "They have a great deal of energy but are also often quiet.", C: "They avoid fantasy and imagination.", D: "They are not passionate about their work." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The creative method that involves combining two or more existing ideas into a new one is called:",
-                options: { A: "Evolution.", B: "Synthesis.", C: "Revolution.", D: "Reapplication." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The negative attitude that blocks creativity exemplified by the thought \"It can't be done\" is:",
-                options: { A: "Fear of looking stupid.", B: "Surrendering before the battle.", C: "Belief that one is not creative.", D: "Fear of what people will think." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Intellectual Property (IP) law primarily aims to:",
-                options: { A: "Restrict the flow of information.", B: "Provide incentives for people to produce scientific and creative works that benefit society.", C: "Make it difficult to start a business.", D: "Protect government secrets." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is a category of Industrial Property?",
-                options: { A: "Novels", B: "Patents", C: "Musical works", D: "Films" },
-                correctAnswer: "B"
-            },
-            {
-                question: "In Nigeria, the government agency responsible for copyright matters is the:",
-                options: { A: "Corporate Affairs Commission (CAC).", B: "Nigerian Copyright Commission (NCC).", C: "Nigerian Investment Promotion Commission (NIPC).", D: "Trademarks, Patents and Designs Registry." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The type of intellectual property that protects symbols used to identify goods in the marketplace is a:",
-                options: { A: "Patent.", B: "Trademark.", C: "Copyright.", D: "Trade secret." },
-                correctAnswer: "B"
-            },
-            {
-                question: "In Nigeria, the general duration of copyright for literary works is:",
-                options: { A: "Life of the author plus 50 years.", B: "Life of the author plus 70 years.", C: "50 years from the date of publication.", D: "20 years from the date of registration." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Technological Entrepreneurship primarily involves:",
-                options: { A: "Using only traditional methods of production.", B: "Using technology as a driving factor to transform resources and create innovative products.", C: "Avoiding any form of innovation.", D: "Focusing solely on agricultural production." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The three symbiotic disciplines where \"Science tells us WHY, Engineering tells us HOW, and Technology makes things happen\" are:",
-                options: { A: "Law, Accounting, and Management.", B: "Science, Engineering, and Technology.", C: "Marketing, Sales, and Distribution.", D: "Physics, Chemistry, and Biology." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is an entrepreneurial opportunity presented by technological development?",
-                options: { A: "Avoiding government patents.", B: "Adapting or imitating other business innovations.", C: "Reducing the need for planning.", D: "Ignoring market trends." },
-                correctAnswer: "B"
-            },
-            {
-                question: "NOTAP (National Office for Technology Acquisition and Promotion) was established to:",
-                options: { A: "Manufacture technological products.", B: "Strengthen national capabilities for negotiating and acquiring technology.", C: "Provide loans to entrepreneurs.", D: "Regulate internet usage." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Innovation is best defined as:",
-                options: { A: "The successful exploitation of new ideas; the profitable outcome of the creative process.", B: "The same as invention.", C: "A process that does not involve risk.", D: "Only related to product development." },
-                correctAnswer: "A"
-            },
-            {
-                question: "According to the notes, which of the following is a source of innovation?",
-                options: { A: "Maintaining the status quo.", B: "Unexpected occurrences.", C: "Avoiding demographic changes.", D: "Resisting new knowledge." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The type of innovation that involves changes and improvements to methods, leading to increased productivity, is:",
-                options: { A: "Product innovation.", B: "Process innovation.", C: "Management innovation.", D: "Breakthrough innovation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "An example of a breakthrough innovation is:",
-                options: { A: "A new flavor of soft drink.", B: "The invention of the Internet.", C: "A new marketing strategy.", D: "An improved customer service protocol." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Diffusion Theory of Innovation\" is characterized by the:",
-                options: { A: "Resistance to all new ideas.", B: "S-curve, which describes the life cycle of an innovation's adoption.", C: "Immediate success of every innovation.", D: "Focus solely on the inventor." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is a force responsible for change in the business environment?",
-                options: { A: "Static consumer preferences.", B: "Changes in technology.", C: "Lack of competition.", D: "Fixed government policies." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Resistance to change by an entrepreneur can be caused by:",
-                options: { A: "Certainty about the outcomes.", B: "Uncertainty about the impact of the change.", C: "Over-communication about the change.", D: "Strong group support for the change." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A family business is distinct because:",
-                options: { A: "It always performs better than non-family businesses.", B: "Decision-making is influenced by multiple generations of a family.", C: "It does not require professional management.", D: "It avoids succession planning." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A major challenge in family businesses is:",
-                options: { A: "Lack of loyalty.", B: "Formulating a succession plan.", C: "Inability to raise capital.", D: "Excessive government regulation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The process of transitioning management and ownership of a family business to the next generation is called:",
-                options: { A: "Merger.", B: "Succession planning.", C: "Liquidation.", D: "Diversification." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Social entrepreneurship is primarily concerned with:",
-                options: { A: "Maximizing shareholder profit.", B: "Creating social value and tackling social problems.", C: "Expanding into international markets.", D: "Competing with large corporations." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The primary motivator for a social enterprise, as opposed to a commercial venture, is:",
-                options: { A: "Financial return for investors.", B: "The mission to address a social concern.", C: "Market dominance.", D: "Personal wealth creation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is a key enhancement factor for social entrepreneurship?",
-                options: { A: "Avoiding feedback.", B: "Knowledge management.", C: "Resistance to innovation.", D: "Lack of clear goals." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A business idea becomes a business opportunity after it has been:",
-                options: { A: "Kept secret.", B: "Researched, refined, and found to be viable.", C: "Rejected by banks.", D: "Discussed with friends." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of the following is a criterion for a true business opportunity?",
-                options: { A: "It requires infinite startup capital.", B: "It has the potential to reach break-even cash flow within a realistic timeframe.", C: "It has a very high level of liability risk.", D: "It shows no potential for growth." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A valuable method for generating business ideas is:",
-                options: { A: "Isolating oneself from society.", B: "Listening to customer complaints and frustrations.", C: "Ignoring current events.", D: "Avoiding brainstorming sessions." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Franchising is a business opportunity that involves:",
-                options: { A: "Inventing a completely new product from scratch.", B: "Being granted exclusive rights to distribute a trademark or service in a specific area.", C: "Operating without any set guidelines.", D: "Avoiding the payment of any fees." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The module defines a business idea as:",
-                options: { A: "A guaranteed success.", B: "A concept that is the first attempt in the process of founding a business.", C: "The same as a business opportunity.", D: "A fully developed business plan." },
-                correctAnswer: "B"
-            },
-            {
-                question: "According to the notes, one of the top business options for a creative individual is:",
-                options: { A: "Avoiding any form of self-employment.", B: "Digital and traditional photography.", C: "Only working for large corporations.", D: "Repeating the same tasks daily." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The element of innovation described as the \"brain\" is:",
-                options: { A: "Challenge.", B: "Customer Focus.", C: "Creativity.", D: "Completion." },
-                correctAnswer: "C"
-            },
-            {
-                question: "The TRIPS Agreement is administered by the:",
-                options: { A: "United Nations (UN).", B: "World Trade Organization (WTO).", C: "World Bank.", D: "International Monetary Fund (IMF)." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The main criticism of the \"Personality Perspective\" of entrepreneurship is that it:",
-                options: { A: "Is too focused on behavior.", B: "Is static and gives little room for individuals to learn and change.", C: "Ignores the role of the entrepreneur.", D: "Is only applicable to large firms." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The uninsurable risk in Knight's theory is also known as:",
-                options: { A: "Calculable risk.", B: "Uncertainty.", C: "Security risk.", D: "Market stability." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Drucker's theory emphasizes that entrepreneurship involves:",
-                options: { A: "Avoiding all possibilities created by change.", B: "Taking advantage of possibilities created by social, cultural, and technological changes.", C: "Focusing solely on internal processes.", D: "Ignoring customer value." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The dimension of entrepreneurship that focuses on the results like new products and services is the:",
-                options: { A: "Process dimension.", B: "Behavioral dimension.", C: "Outcome dimension.", D: "Functional dimension." },
-                correctAnswer: "C"
-            },
-            {
-                question: "The \"Dynamic Learning Perspective\" of entrepreneurship is particularly relevant for:",
-                options: { A: "Only the startup phase of a venture.", B: "Understanding how entrepreneurs adapt as their enterprise grows.", C: "Ignoring the need for education.", D: "Static business environments." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Corporate venturing can be accomplished through all of the following EXCEPT:",
-                options: { A: "Internal corporate venturing.", B: "Cooperative corporate venturing.", C: "Hostile takeovers.", D: "External corporate ventures." },
-                correctAnswer: "C"
-            },
-            {
-                question: "In Nigeria, a \"one-stop-shop\" for new enterprise registration is available at the:",
-                options: { A: "Nigerian Copyright Commission.", B: "Nigerian Investment Promotion Commission (NIPC).", C: "Central Bank of Nigeria.", D: "Ministry of Labour." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A strength in a SWOT analysis could be:",
-                options: { A: "A new competitor entering the market.", B: "Technical skills and financial ability.", C: "Changing government regulations.", D: "Economic recession." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The characteristic of creativity that involves alternating between imagination and a rooted sense of reality is:",
-                options: { A: "Having a great deal of energy.", B: "Harboring opposite tendencies.", C: "Being both playful and disciplined.", D: "Being rebellious and independent." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The creative method of \"Reapplication\" means:",
-                options: { A: "Incrementally improving an old idea.", B: "Looking at something old in a new way.", C: "Creating a completely different idea.", D: "Changing the direction of attention." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The formula for Coca-Cola is protected as:",
-                options: { A: "A patent.", B: "A trade secret.", C: "A copyright.", D: "A trademark." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The rights of performing artists are protected under:",
-                options: { A: "Patent law.", B: "Related rights to copyright.", C: "Trademark law.", D: "Industrial design law." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The system of trademark registration in Nigeria is governed by the:",
-                options: { A: "Copyright Act.", B: "Trademarks Act of 1965.", C: "Patents and Designs Act.", D: "Companies and Allied Matters Act." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A key component of technology is:",
-                options: { A: "Ignoring techniques.", B: "Know-how, skills, and competence.", C: "Avoiding the use of machines.", D: "Focusing only on theory." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Science, Engineering, and Technology are described as:",
-                options: { A: "Completely independent fields.", B: "Symbiotically linked disciplines.", C: "Having no relation to entrepreneurship.", D: "Only relevant for academic study." },
-                correctAnswer: "B"
-            },
-            {
-                question: "An entrepreneurial opportunity arising from \"government patent\" implies:",
-                options: { A: "Ignoring all government regulations.", B: "Taking advantage of patents available on a royalty or royalty-free basis.", C: "Avoiding any interaction with the government.", D: "Stealing intellectual property." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The institution established to facilitate the commercialization of R&D results in Nigeria is the:",
-                options: { A: "Raw Materials Research and Development Council (RMRDC).", B: "Technology Incubation Centre (TIC).", C: "National Office for Technology Acquisition and Promotion (NOTAP).", D: "Federal Institute of Industrial Research, Oshodi (FIIRO)." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The type of innovation that extends a technological innovation into a better product or service is called:",
-                options: { A: "Breakthrough innovation.", B: "Technological innovation.", C: "Ordinary innovation.", D: "Process innovation." },
-                correctAnswer: "C"
-            },
-            {
-                question: "In the Diffusion of Innovation theory, the \"communication channels\" element refers to:",
-                options: { A: "The financial resources available.", B: "The means by which the innovation spreads.", C: "The personality of the inventor.", D: "The legal protection for the innovation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A political/legal change that an entrepreneur should monitor is:",
-                options: { A: "The weather forecast.", B: "Taxation policy.", C: "Competitors' internal meetings.", D: "Employee personal preferences." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The strategy for managing change resistance that involves training classes and meetings is:",
-                options: { A: "Participation and Involvement.", B: "Education and Communication.", C: "Negotiation and Agreement.", D: "Manipulation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "In a family business, a potential problem area is:",
-                options: { A: "Lack of familial ties.", B: "Sibling rivalry.", C: "Too much external management.", D: "Excessive planning." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A benefit of a family business is:",
-                options: { A: "Guaranteed success.", B: "Legacy and long-term perspective.", C: "Freedom from all conflicts.", D: "Exemption from taxes." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Schwab Foundation for Social Entrepreneurship invests in social entrepreneurs by:",
-                options: { A: "Giving large direct grants.", B: "Providing access to networks and resources to scale their work.", C: "Taking over their operations.", D: "Focusing only on high-income countries." },
-                correctAnswer: "B"
-            },
-            {
-                question: "For a social enterprise, \"value creation\" is measured by:",
-                options: { A: "Shareholder dividends.", B: "Its social impact.", C: "Executive salaries.", D: "Market share alone." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A source of funding for non-profit social enterprises is:",
-                options: { A: "Issuing shares on the stock market.", B: "Government or private grants and donations.", C: "Venture capital focused only on high returns.", D: "Personal loans from family only." },
-                correctAnswer: "B"
-            },
-            {
-                question: "When evaluating a business opportunity, it is important that the entrepreneur has:",
-                options: { A: "No passion for the idea.", B: "The strength and ability to drive the business to success.", C: "Unlimited financial resources from the start.", D: "A guarantee of no competition." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A good way to generate a business idea is to:",
-                options: { A: "Ignore your own skills and passions.", B: "Add value to an already existing product.", C: "Only consider ideas that have never been thought of before.", D: "Avoid talking to potential customers." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The term \"entrepreneurship\" is best described as a:",
-                options: { A: "Personality type.", B: "Process undertaken by an entrepreneur.", C: "Guaranteed path to wealth.", D: "Simple, universally agreed-upon concept." },
-                correctAnswer: "B"
-            },
-            {
-                question: "According to the notes, the controversy surrounding entrepreneurship theory has:",
-                options: { A: "Been completely resolved.", B: "Generated vigorous research interest.", C: "Led to a single unifying theory.", D: "Made the concept less important." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Three Dimensions of Entrepreneurship\" framework categorizes definitions based on:",
-                options: { A: "Age, gender, and location of the entrepreneur.", B: "Processes, behaviors, and outcomes.", C: "Risk, reward, and innovation.", D: "Product, price, and place." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A definition focusing on \"the competitive behaviors that drive the market process\" falls under the dimension of:",
-                options: { A: "Processes.", B: "Behaviors.", C: "Outcomes.", D: "Functions." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Casson's Economic Theory suggests that entrepreneurship arises from:",
-                options: { A: "Religious beliefs.", B: "Conducive economic conditions.", C: "A high need for achievement.", D: "Random chance." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Functional Perspective\" of entrepreneurship originated in the field of:",
-                options: { A: "Psychology.", B: "Economics.", C: "Sociology.", D: "Management." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Strategic Entrepreneurship within a corporation involves innovations that are:",
-                options: { A: "Always low-risk.", B: "Adopted in the firm's pursuit of competitive advantage.", C: "Limited to product offerings only.", D: "Independent of the firm's strategy." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A factor that has created a need for Corporate Entrepreneurship is:",
-                options: { A: "Rapid growth in the number of new and sophisticated competitors.", B: "Decreased global competition.", C: "Increased trust in traditional management methods.", D: "An influx of talented people into corporations." },
-                correctAnswer: "A"
-            },
-            {
-                question: "The desire for quick returns and application of fraudulent practices are:",
-                options: { A: "Encouraged for sustainable growth.", B: "Inimical to sustainable entrepreneurship growth.", C: "Signs of good business acumen.", D: "Recommended for new entrepreneurs." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Nigerian economic system, as described in the notes, is:",
-                options: { A: "A purely socialist system.", B: "A capitalist system where market forces govern.", C: "A mixed economic system with heavy government control in all sectors.", D: "A traditional economy." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A threat to local industries in Nigeria mentioned in the notes is:",
-                options: { A: "High demand for local goods.", B: "Smuggling and dumping of cheap, substandard goods.", C: "Strict import regulations.", D: "Lack of foreign products." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The ecological environment factor in PESTEL includes laws on:",
-                options: { A: "Interest rates.", B: "Waste disposal and pollution monitoring.", C: "Political stability.", D: "Age distribution." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Lagos Chamber Arbitration Centre (LCAC) was established to:",
-                options: { A: "Register new businesses.", B: "Provide arbitration and mediation services for business disputes.", C: "Promote exports.", D: "Set product safety standards." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The notes suggest that an entrepreneur should start with:",
-                options: { A: "Seeking massive funding.", B: "Mindset Development.", C: "Hiring a large team.", D: "Ignoring nay-sayers." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A good business idea, according to the notes, should:",
-                options: { A: "Be extremely complex to understand.", B: "Start with your passion.", C: "Focus only on short-term profits.", D: "Be kept completely secret." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The creative method of \"Evolution\" refers to:",
-                options: { A: "A radical, sudden change.", B: "Incremental improvement over time.", C: "Combining existing ideas.", D: "Changing the application of an idea." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The statement \"I'm not creative\" is identified as a:",
-                options: { A: "Truth for most people.", B: "Negative attitude that blocks creativity.", C: "Sign of maturity.", D: "Realistic self-assessment." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Copyright protection generally begins:",
-                options: { A: "Only after registration is complete.", B: "From the moment the work is created in a tangible form.", C: "50 years after the author's death.", D: "When the work is sold." },
-                correctAnswer: "B"
-            },
-            {
-                question: "An \"assignment\" of copyright involves:",
-                options: { A: "Temporarily licensing the rights.", B: "A transfer of ownership of the rights.", C: "Only allowing non-commercial use.", D: "Automatically expiring after one year." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Techno-preneurs are characterized by their use of:",
-                options: { A: "Only low-tech solutions.", B: "Technology as a key driving factor.", C: "Exclusively traditional marketing.", D: "Manual labor over automation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The term \"know-how\" in technology refers to:",
-                options: { A: "General knowledge.", B: "Specialized skills.", C: "Basic literacy.", D: "Financial capital." },
-                correctAnswer: "B"
-            },
-            {
-                question: "An entrepreneurial opportunity identified in the notes is analyzing:",
-                options: { A: "Competitors' private emails.", B: "Government policy statements and budgets.", C: "Only international markets.", D: "Historical data from 100 years ago." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The technological environment factor that includes \"training and management institutions\" is:",
-                options: { A: "Sources of technology.", B: "Technological development.", C: "Impact of technology on humans.", D: "Technology infrastructure." },
-                correctAnswer: "D"
-            },
-            {
-                question: "Biotechnology presents entrepreneurial opportunities in areas like:",
-                options: { A: "Traditional mining.", B: "Genetic manipulation of microorganisms.", C: "Woodwork and carpentry.", D: "Pure theoretical mathematics." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Federal Institute of Industrial Research, Oshodi (FIIRO) is involved in research into:",
-                options: { A: "Astronomical phenomena.", B: "Food processing and agro-allied products.", C: "Political systems.", D: "Ancient history." },
-                correctAnswer: "B"
-            },
-            {
-                question: "According to Okpara (2005), the element of innovation described as the \"life blood\" is:",
-                options: { A: "Challenge.", B: "Creativity.", C: "Communication.", D: "Collaboration." },
-                correctAnswer: "C"
-            },
-            {
-                question: "Innovation in management and work organization is a type of innovation that focuses on:",
-                options: { A: "Only the product itself.", B: "The exploitation of human resources and organizational structures.", C: "Ignoring employee needs.", D: "Reducing quality to cut costs." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Disruptive Innovation Model suggests that innovation often:",
-                options: { A: "Is always immediately successful.", B: "Outstrips the market's capacity to assimilate it.", C: "Should be avoided by entrepreneurs.", D: "Is synonymous with simple improvement." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Change management is necessary because change is:",
-                options: { A: "A rare event in business.", B: "A regular aspect of organizational life.", C: "Always predictable.", D: "Easy to implement without resistance." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A cause of change in the business environment is:",
-                options: { A: "Static social customs.", B: "Intense competition.", C: "Fixed technology.", D: "Unchanging laws." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The emotional turmoil that a change may cause is a reason for:",
-                options: { A: "Embracing change immediately.", B: "Resistance to change.", C: "Increasing communication.", D: "Ignoring the change." },
-                correctAnswer: "B"
-            },
-            {
-                question: "One of the seven critical change areas for small businesses is:",
-                options: { A: "Avoiding technology.", B: "Capital becoming more difficult to obtain.", C: "Reducing management professionalism.", D: "Decreasing government regulation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "In a family business, \"Co-Preneurs\" refers to:",
-                options: { A: "Siblings working together.", B: "Husband-and-wife teams.", C: "Parents and children.", D: "Cousins in business." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A common challenge in family business is:",
-                options: { A: "Lack of legacy.", B: "Conflicting goals and values among family members.", C: "Inability to hire non-family members.", D: "Too much succession planning." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The management succession process in a family business is often recommended to be:",
-                options: { A: "Done after the ownership succession.", B: "Carried out before the ownership succession.", C: "Avoided altogether.", D: "The only part of succession that matters." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Social entrepreneurs are described as:",
-                options: { A: "Focusing solely on financial value creation.", B: "Pragmatic visionaries who achieve large-scale social change.", C: "Being unconcerned with practical implementation.", D: "Avoiding innovation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The process of creating social value starts with:",
-                options: { A: "Securing unlimited funding.", B: "Identifying a social problem.", C: "Hiring a large team.", D: "Partnering with a multinational corporation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "NGOs can support social entrepreneurship by:",
-                options: { A: "Replacing government functions entirely.", B: "Supporting innovation through pilot projects.", C: "Focusing only on their own internal goals.", D: "Avoiding communication with communities." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Global Good Fund Fellowship is an example of a:",
-                options: { A: "Government grant.", B: "Funding and leadership development opportunity for social entrepreneurs.", C: "Traditional bank loan.", D: "Prize for scientific invention." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A key factor that enhances social entrepreneurship is:",
-                options: { A: "Rigidity and resistance to change.", B: "Resilience—the ability to overcome obstacles.", C: "Avoiding all forms of reputation building.", D: "Keeping knowledge within the founder." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The main difference between a business idea and a business opportunity is that an opportunity:",
-                options: { A: "Is just a thought.", B: "Has been validated through research and is considered viable.", C: "Requires no capital.", D: "Is always simple to execute." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A business opportunity should have the potential for:",
-                options: { A: "Immediate profit without investment.", B: "Residual income.", C: "Constant high liability.", D: "Staying exactly the same over time." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Examining your own skills, talents, and passions is a method for:",
-                options: { A: "Avoiding self-awareness.", B: "Generating business ideas from within.", C: "Copying competitors.", D: "Justifying inaction." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The example of \"sachet water\" in Nigeria illustrates the idea generation method of:",
-                options: { A: "Franchising.", B: "Adding value to an existing product.", C: "Mass media analysis.", D: "Industrial surveys." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Attending exhibitions and trade shows helps an entrepreneur to:",
-                options: { A: "Isolate themselves from the market.", B: "Discover new products and meet suppliers.", C: "Avoid networking.", D: "Focus only on theoretical knowledge." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The theory that emphasizes profit as a reward for bearing uninsurable risk is associated with:",
-                options: { A: "Joseph Schumpeter.", B: "Frank Knight.", C: "Max Weber.", D: "Peter Drucker." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The perspective that views entrepreneurship as a process-based activity rather than a set of personality traits is the:",
-                options: { A: "Personality Perspective.", B: "Behavioral Perspective.", C: "Functional Perspective.", D: "Economic Perspective." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Which of these is a key feature commonly found in definitions of entrepreneurship?",
-                options: { A: "Avoiding all risks.", B: "The identification and exploitation of opportunities.", C: "Guaranteed government support.", D: "Operating only within large corporations." },
-                correctAnswer: "B"
-            },
-            {
-                question: "Corporate venturing that involves adding new businesses via equity investments in external startups is known as:",
-                options: { A: "Internal corporate venturing.", B: "Cooperative corporate venturing.", C: "External corporate ventures.", D: "Strategic entrepreneurship." },
-                correctAnswer: "C"
-            },
-            {
-                question: "A major political factor affecting business in Nigeria is:",
-                options: { A: "The country's high literacy rate.", B: "The perceived threat to security from criminal activities.", C: "Stable and cheap power supply.", D: "The absence of any form of corruption." },
-                correctAnswer: "B"
-            },
-            {
-                question: "In a SWOT analysis, a 'threat' could be:",
-                options: { A: "Skilled workforce.", B: "Strong brand reputation.", C: "New competitors entering the market.", D: "Access to new technology." },
-                correctAnswer: "C"
-            },
-            {
-                question: "Which of the following is a characteristic of creative individuals?",
-                options: { A: "They are always either purely extroverted or purely introverted.", B: "They are both humble and proud at the same time.", C: "They strictly adhere to traditional gender roles.", D: "They avoid suffering and pain at all costs." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The creative method that involves a marked, radical change from previous ideas is:",
-                options: { A: "Evolution.", B: "Synthesis.", C: "Revolution.", D: "Reapplication." },
-                correctAnswer: "C"
-            },
-            {
-                question: "In Nigeria, patents and industrial designs are governed by the:",
-                options: { A: "Copyright Act.", B: "Trademarks Act.", C: "Patents and Designs Act.", D: "Companies and Allied Matters Act." },
-                correctAnswer: "C"
-            },
-            {
-                question: "A key international treaty for the protection of artistic and literary works is the:",
-                options: { A: "Paris Convention.", B: "Berne Convention.", C: "TRIPS Agreement.", D: "WTO Agreement." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The primary goal of a social entrepreneur is to:",
-                options: { A: "Maximize personal wealth.", B: "Create sustainable social change.", C: "Outperform all commercial competitors.", D: "Secure the largest possible grant." },
-                correctAnswer: "B"
-            },
-            {
-                question: "When generating business ideas, \"brainstorming\" is a technique used to:",
-                options: { A: "Critically evaluate each idea as it is mentioned.", B: "Generate a large quantity of ideas without initial judgment.", C: "Finalize a business plan.", D: "Secure funding from investors." },
-                correctAnswer: "B"
-            },
-            {
-                question: "According to the notes, an area of business opportunity in Nigeria is:",
-                options: { A: "Manufacturing typewriters.", B: "Haulage and logistics.", C: "Selling snow.", D: "Exporting sand." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The element of innovation that represents the \"pull\" or the goal is:",
-                options: { A: "Customer Focus.", B: "Challenge.", C: "Completion.", D: "Contemplation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The theory that innovation spreads through communication channels over time within a social system is the:",
-                options: { A: "Disruptive Innovation Model.", B: "Diffusion of Innovation theory.", C: "Achievement Motivation Theory.", D: "Risk-bearing Theory." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A force for change stemming from attitudes, behavior, and family structure is:",
-                options: { A: "Economic factors.", B: "Social-cultural causes.", C: "Political changes.", D: "Technological changes." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The strategy for managing resistance to change that involves giving a stake in the change process is:",
-                options: { A: "Education and Communication.", B: "Participation and Involvement.", C: "Facilitation and Support.", D: "Explicit and Implicit Coercion." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A unique challenge for family firms is to:",
-                options: { A: "Avoid hiring any family members.", B: "Maintain entrepreneurial drive over generations.", C: "Focus only on short-term profits.", D: "Sell the business after the first generation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Schwab Foundation supports social entrepreneurs primarily by:",
-                options: { A: "Providing direct cash transfers to beneficiaries.", B: "Offering a platform for legitimacy, network access, and resource mobilization.", C: "Managing their day-to-day operations.", D: "Focusing only on local community projects." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A critical factor for a social enterprise's success, listed under \"inputs,\" is:",
-                options: { A: "Ignoring intellectual capital.", B: "Having appropriate tangible and intangible resources.", C: "Avoiding any form of financing.", D: "Keeping goals vague." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The notes define an entrepreneur within a large firm who uses entrepreneurial skills without incurring the associated risks as a(n):",
-                options: { A: "Proprietor.", B: "Intrapreneur.", C: "Investor.", D: "Manager." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The dimension of entrepreneurship that focuses on \"what is involved and why it matters\" is the:",
-                options: { A: "Behavioral dimension.", B: "Process dimension.", C: "Outcome dimension.", D: "Strategic dimension." },
-                correctAnswer: "B"
-            },
-            {
-                question: "McClelland's theory identifies three motives; the one that is NOT a primary driver of entrepreneurship is the need for:",
-                options: { A: "Achievement.", B: "Power.", C: "Affiliation.", D: "[Achievement and Power are drivers, Affiliation is less so]." },
-                correctAnswer: "C"
-            },
-            {
-                question: "The criticism that the Personality Perspective is \"static\" means it:",
-                options: { A: "Is too focused on change.", B: "Does not allow for learning and development.", C: "Is only applicable to new ventures.", D: "Ignores innate traits." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The strategy for managing resistance that involves bargaining with resistors is:",
-                options: { A: "Education and Communication.", B: "Negotiation and Agreement.", C: "Facilitation and Support.", D: "Explicit and Implicit Coercion." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A major advantage of a family business is the potential for:",
-                options: { A: "High levels of bureaucracy.", B: "Long-term commitment and stability.", C: "Constant conflict with non-family employees.", D: "Quick decision-making without any consultation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The primary \"output\" of a social enterprise's process is the:",
-                options: { A: "Social problem identified.", B: "Goods or services delivered.", C: "Financial profit generated.", D: "Number of volunteers recruited." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The Ashoka organization is a well-known:",
-                options: { A: "Commercial bank.", B: "Global association of social entrepreneurs.", C: "Government regulatory body.", D: "Technology company." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A business opportunity is considered viable if it:", options: { A: "Has no potential for growth.", B: "Can reach break-even cash flow.", C: "Requires infinite startup capital.", D: "Has a very high level of liability risk." }, correctAnswer: "B"
-            },
-            {
-                question: "The method of generating ideas by \"brainstorming\" emphasizes:", options: { A: "Immediate criticism of every idea.", B: "Quantity of ideas over initial quality.", C: "Only ideas that have been proven before.", D: "Involving only the founder." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The business option of \"ICT Services\" is viable due to:", options: { A: "The decreasing reliance on technology.", B: "The increasing need for computer training, repairs, and networking.", C: "The saturation of the market with no room for new entrants.", D: "The lack of any demand for software." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The element of innovation that involves \"listening to the voice of the customer\" is:", options: { A: "Challenge.", B: "Customer Focus.", C: "Communication.", D: "Contemplation." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The \"Innovators\" in the Diffusion of Innovation curve are the first:", options: { A: "34% to adopt.", B: "2.5% to adopt.", C: "16% to adopt.", D: "50% to adopt." },
-                correctAnswer: "B"
-            },
-            {
-                question: "A change in environmental protection laws is a factor under which PESTEL category?", options: { A: "Political", B: "Economic", C: "Ecological/Environmental", D: "Legal" },
-                correctAnswer: "C"
-            },
-            {
-                question: "The emotional reaction to change that involves a feeling of loss is a form of:", options: { A: "Support for change.", B: "Resistance to change.", C: "Indifference to change.", D: "Celebration of change." },
-                correctAnswer: "B"
-            },
-            {
-                question: "The succession issue of \"When should the transition occur?\" relates to:", options: { A: "The method of transfer.", B: "The timing of the succession.", C: "The selection of the successor.", D: "The valuation of the business." },
-                correctAnswer: "B"
-            },
-            {
-                question: "For a social enterprise, \"sustainability\" refers to the ability to:", options: { A: "Rely solely on grants forever.", B: "Continue its operations and impact over the long term.", C: "Maximize profit in the short term.", D: "Avoid any form of change." },
-                correctAnswer: "B"
-            },
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    userId = auth.currentUser?.uid || 'anonymous-user';
+                }
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                // Fallback to simulated ID
+            }
+            document.querySelector('#user-info span:first-child').textContent = `User ID: ${userId.substring(0, 8)}...`;
+            window.app_initialized = true;
+            window.userId = userId;
+        };
+
+        initFirebase();
+    </script>
+
+    <!-- Quiz Logic -->
+    <script>
+        // --- 170 QUESTIONS ARRAY ---
+        // Q: question text, options: array of options (A, B, C, D), answer: correct option index (0 for A, 1 for B, 2 for C, 3 for D)
+        const allQuestions = [
+            // Q1-Q70 from Java_Objective_Questions.pdf
+            { q: 'Which of the following correctly defines a class in Java?', options: ['A) A class is a template for creating objects', 'B) A class is an instance of an object', 'C) A class is used only to store data', 'D) A class cannot contain methods'], answer: 0 },
+            { q: 'What is the default value of an uninitialized object reference in Java?', options: ['A) 0', 'B) null', 'C) undefined', 'D) empty'], answer: 1 },
+            { q: 'Which keyword is used to create an object in Java?', options: ['A) object', 'B) alloc', 'C) new', 'D) malloc'], answer: 2 },
+            { q: 'What is true about constructors in Java?', options: ['A) They can return a value', 'B) They have the same name as the class', 'C) They must be declared static', 'D) They can be inherited'], answer: 1 },
+            { q: 'Which of the following allows access to class members without creating an object?', options: ['A) private methods', 'B) instance methods', 'C) static methods', 'D) constructors'], answer: 2 },
+            { q: 'When an array is declared but not initialized, what does Java allocate?', options: ['A) Memory with zero values', 'B) Null references for each element', 'C) Default primitive values', 'D) No memory until initialization'], answer: 3 },
+            { q: 'What will happen if you access an array index out of bounds?', options: ['A) It wraps to the beginning', 'B) It returns null', 'C) It throws ArrayIndexOutOfBoundsException', 'D) It ignores the access'], answer: 2 },
+            { q: 'Which of these loop constructs guarantees at least one execution?', options: ['A) for loop', 'B) while loop', 'C) do-while loop', 'D) if-else block'], answer: 2 },
+            { q: 'What is the purpose of the "this" keyword in Java?', options: ['A) Refers to the current class instance', 'B) Refers to the parent class', 'C) Used for method overriding', 'D) Declares a final variable'], answer: 0 },
+            { q: 'Which access modifier restricts access to the class and its subclasses within the same package?', options: ['A) private', 'B) public', 'C) protected', 'D) default (package-private)'], answer: 2 },
+            { q: 'Which statement correctly declares and initializes a 2D array in Java?', options: ['A) int[][] arr = {{1, 2}, {3, 4}};', 'B) int[2][2] arr = {1, 2, 3, 4};', 'C) int arr[][] = new int[2];', 'D) array int[][] arr;'], answer: 0 },
+            { q: 'How can you prevent a class from being inherited?', options: ['A) Declare it public', 'B) Declare it abstract', 'C) Declare it final', 'D) Declare it static'], answer: 2 },
+            { q: 'What is method overloading?', options: ['A) Defining a method in a subclass with the same signature as in the superclass', 'B) Defining multiple methods in the same class with the same name but different parameters', 'C) Defining multiple methods in a class with the same name and same parameters', 'D) Changing the return type of an inherited method'], answer: 1 },
+            { q: 'In a for loop, which component is executed only once?', options: ['A) The loop body', 'B) The initialization expression', 'C) The termination expression', 'D) The iteration expression'], answer: 1 },
+            { q: 'Which of the following is NOT a primitive data type in Java?', options: ['A) int', 'B) float', 'C) String', 'D) char'], answer: 2 },
+            { q: 'Which concept allows a subclass object to be treated as a superclass object?', options: ['A) Encapsulation', 'B) Abstraction', 'C) Polymorphism', 'D) Inheritance'], answer: 2 },
+            { q: 'What does the "static" keyword primarily indicate in a method?', options: ['A) The method can be overridden', 'B) The method belongs to the class, not a specific object', 'C) The method can only be accessed within the class', 'D) The method cannot be changed'], answer: 1 },
+            { q: 'Which statement about the "main" method signature is correct?', options: ['A) It must be static and public, and return void', 'B) It must be public, but can be non-static', 'C) It can return any value', 'D) It must be private'], answer: 0 },
+            { q: 'What happens when a "break" statement is encountered inside a switch case?', options: ['A) The program terminates', 'B) The control jumps to the next iteration of a loop', 'C) The control jumps to the end of the switch statement', 'D) It causes a runtime error'], answer: 2 },
+            { q: 'How do you correctly cast a double to an int in Java?', options: ['A) int i = (int) d;', 'B) int i = d.intValue();', 'C) int i = (int) d.round();', 'D) int i = d;'], answer: 0 },
+            { q: 'Which class is the root of the Java class hierarchy?', options: ['A) System', 'B) Main', 'C) Object', 'D) Class'], answer: 2 },
+            { q: 'Which type of variables are created when an object is instantiated?', options: ['A) Local variables', 'B) Static variables', 'C) Instance variables', 'D) Class variables'], answer: 2 },
+            { q: 'What is the result of 10 / 3 in Java?', options: ['A) 3.333', 'B) 3', 'C) 3.0', 'D) A runtime error'], answer: 1 },
+            { q: 'Which method is used to compare two String objects for equality of content?', options: ['A) ==', 'B) equals()', 'C) compare()', 'D) matches()'], answer: 1 },
+            { q: 'What is the purpose of the "super" keyword?', options: ['A) To call the superclass\'s constructor or methods', 'B) To declare a final class', 'C) To declare a static variable', 'D) To create an interface'], answer: 0 },
+            { q: 'Which keyword is used to handle exceptions in Java?', options: ['A) thrown', 'B) catch', 'C) exception', 'D) finally'], answer: 1 },
+            { q: 'Which statement about interfaces in Java is correct?', options: ['A) An interface can contain constructors', 'B) An interface can contain only abstract methods (before Java 8)', 'C) An interface can be instantiated', 'D) All interface methods must be private'], answer: 1 },
+            { q: 'Which is the correct way to calculate the length of an array named arr?', options: ['A) arr.size()', 'B) arr.length()', 'C) arr.length', 'D) size(arr)'], answer: 2 },
+            { q: 'What is autoboxing in Java?', options: ['A) Automatic conversion of a primitive type to its corresponding wrapper class object', 'B) Automatic conversion of a wrapper class object to its corresponding primitive type', 'C) Automatic assignment of null to uninitialized variables', 'D) Automatic memory management by the Garbage Collector'], answer: 0 },
+            { q: 'What is the output of System.out.println(5 | 3); (Bitwise OR)', options: ['A) 1', 'B) 7', 'C) 5', 'D) 3'], answer: 1 },
+            { q: 'Which statement about Java packages is true?', options: ['A) A package can contain classes, interfaces, and methods', 'B) A package can contain only classes', 'C) A package name must start with a capital letter', 'D) Two classes in different packages cannot have the same name'], answer: 0 },
+            { q: 'Which mechanism is used to achieve runtime polymorphism in Java?', options: ['A) Method Overloading', 'B) Operator Overloading', 'C) Method Overriding', 'D) Constructor Overloading'], answer: 2 },
+            { q: 'What is the primary function of the JVM (Java Virtual Machine)?', options: ['A) To compile Java source code into bytecode', 'B) To execute the Java bytecode', 'C) To manage the hardware resources', 'D) To create the class files'], answer: 1 },
+            { q: 'Which operator is used to check if an object is an instance of a particular class or interface?', options: ['A) instanceof', 'B) typeOf', 'C) isA', 'D) instance'], answer: 0 },
+            { q: 'What is the difference between "==" and the equals() method for objects?', options: ['A) Both compare object content', 'B) "==" compares content, equals() compares references', 'C) "==" compares references, equals() compares content (if overridden)', 'D) They are always interchangeable'], answer: 2 },
+            { q: 'What will be the output of the following code? int x = 10; x++; System.out.println(x);', options: ['A) 10', 'B) 11', 'C) 9', 'D) Compilation error'], answer: 1 },
+            { q: 'Which keyword is used to explicitly throw an exception?', options: ['A) throws', 'B) throwable', 'C) throw', 'D) finally'], answer: 2 },
+            { q: 'Which access modifier is the most restrictive?', options: ['A) default', 'B) protected', 'C) private', 'D) public'], answer: 2 },
+            { q: 'What is the purpose of the "final" keyword when applied to a method?', options: ['A) To make the method static', 'B) To prevent the method from being overridden', 'C) To ensure the method returns a value', 'D) To hide the method from other classes'], answer: 1 },
+            { q: 'What is the default block in a switch statement used for?', options: ['A) To execute code when none of the case constants match the switch expression', 'B) It is mandatory and always executes first', 'C) It is executed only if a break statement is present', 'D) It is only used with String switch expressions'], answer: 0 },
+            { q: 'Q41. In Java, which statement about strings is correct when used in a complex program structure?', options: ['A) Strings can only be defined once per package', 'B) Strings can be manipulated using a wide range of built-in methods', 'C) Strings cannot interact with each other dynamically', 'D) Strings must always be declared static'], answer: 1 },
+            { q: 'Q42. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or multidimensional as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q43. In Java, which statement about variables is correct when used in a complex program structure?', options: ['A) Variables can only be defined once per package', 'B) Variables can be declared and initialized dynamically as needed', 'C) Variables cannot interact with each other dynamically', 'D) Variables must always be declared static'], answer: 1 },
+            { q: 'Q44. In Java, which statement about classes is correct when used in a complex program structure?', options: ['A) Classes can only be defined once per package', 'B) Classes can be inherited and extended as needed', 'C) Classes cannot interact with each other dynamically', 'D) Classes must always be declared static'], answer: 1 },
+            { q: 'Q45. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be instantiated multiple times and interact dynamically', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q46. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be overloaded and overridden as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q47. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested for complex iteration patterns', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q48. In Java, which statement about inheritance is correct when used in a complex program structure?', options: ['A) Inheritance can only be defined once per package', 'B) Inheritance allows for code reuse and hierarchical organization', 'C) Inheritance cannot interact with each other dynamically', 'D) Inheritance must always be declared static'], answer: 1 },
+            { q: 'Q49. In Java, which statement about polymorphism is correct when used in a complex program structure?', options: ['A) Polymorphism can only be defined once per package', 'B) Polymorphism enables objects to take on multiple forms, improving flexibility', 'C) Polymorphism cannot interact with each other dynamically', 'D) Polymorphism must always be declared static'], answer: 1 },
+            { q: 'Q50. In Java, which statement about encapsulation is correct when used in a complex program structure?', options: ['A) Encapsulation can only be defined once per package', 'B) Encapsulation binds data and methods, providing data hiding', 'C) Encapsulation cannot interact with each other dynamically', 'D) Encapsulation must always be declared static'], answer: 1 },
+            { q: 'Q51. In Java, which statement about abstraction is correct when used in a complex program structure?', options: ['A) Abstraction can only be defined once per package', 'B) Abstraction hides implementation details and shows only necessary information', 'C) Abstraction cannot interact with each other dynamically', 'D) Abstraction must always be declared static'], answer: 1 },
+            { q: 'Q52. In Java, which statement about interface is correct when used in a complex program structure?', options: ['A) Interface can only be defined once per package', 'B) Interface allows for total abstraction and supports multiple inheritance of type', 'C) Interface cannot interact with each other dynamically', 'D) Interface must always be declared static'], answer: 1 },
+            { q: 'Q53. In Java, which statement about exception is correct when used in a complex program structure?', options: ['A) Exception can only be defined once per package', 'B) Exception handling manages runtime errors gracefully', 'C) Exception cannot interact with each other dynamically', 'D) Exception must always be declared static'], answer: 1 },
+            { q: 'Q54. In Java, which statement about threads is correct when used in a complex program structure?', options: ['A) Threads can only be defined once per package', 'B) Threads allow for concurrent execution of parts of a program', 'C) Threads cannot interact with each other dynamically', 'D) Threads must always be declared static'], answer: 1 },
+            { q: 'Q55. In Java, which statement about collections is correct when used in a complex program structure?', options: ['A) Collections can only be defined once per package', 'B) Collections provide a unified framework for storing and manipulating groups of objects', 'C) Collections cannot interact with each other dynamically', 'D) Collections must always be declared static'], answer: 1 },
+            { q: 'Q56. Q56. In Java, which statement about classes is correct when used in a complex program structure?', options: ['A) Classes can only be defined once per package', 'B) Classes can be nested or overloaded as needed', 'C) Classes cannot interact with each other dynamically', 'D) Classes must always be declared static'], answer: 1 },
+            { q: 'Q57. Q57. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q58. Q58. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q59. Q59. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q60. Q60. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q61. Q61. In Java, which statement about classs is correct when used in a complex program structure?', options: ['A) Classs can only be defined once per package', 'B) Classs can be nested or overloaded as needed', 'C) Classs cannot interact with each other dynamically', 'D) Classs must always be declared static'], answer: 1 },
+            { q: 'Q62. Q62. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q63. Q63. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q64. Q64. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q65. Q65. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q66. Q66. In Java, which statement about objects is correct when used in a complex program structure?', options: ['A) Objects can only be defined once per package', 'B) Objects can be nested or overloaded as needed', 'C) Objects cannot interact with each other dynamically', 'D) Objects must always be declared static'], answer: 1 },
+            { q: 'Q67. Q67. In Java, which statement about methods is correct when used in a complex program structure?', options: ['A) Methods can only be defined once per package', 'B) Methods can be nested or overloaded as needed', 'C) Methods cannot interact with each other dynamically', 'D) Methods must always be declared static'], answer: 1 },
+            { q: 'Q68. Q68. In Java, which statement about loops is correct when used in a complex program structure?', options: ['A) Loops can only be defined once per package', 'B) Loops can be nested or overloaded as needed', 'C) Loops cannot interact with each other dynamically', 'D) Loops must always be declared static'], answer: 1 },
+            { q: 'Q69. Q69. In Java, which statement about arrays is correct when used in a complex program structure?', options: ['A) Arrays can only be defined once per package', 'B) Arrays can be nested or overloaded as needed', 'C) Arrays cannot interact with each other dynamically', 'D) Arrays must always be declared static'], answer: 1 },
+            { q: 'Q70. Q70. In Java, which statement about classs is correct when used in a complex program structure?', options: ['A) Classs can only be defined once per package', 'B) Classs can be nested or overloaded as needed', 'C) Classs cannot interact with each other dynamically', 'D) Classs must always be declared static'], answer: 1 },
+
+            // Q71-Q170 (1-100 from Java_Objective_Questions (2).pdf)
+            { q: 'Which of the following best describes encapsulation in Java?', options: ['A. Binding data and methods that operate on the data into a single unit', 'B. Using multiple inheritance', 'C. Hiding implementation using abstract classes', 'D. Using final keyword'], answer: 0 },
+            { q: 'What will happen if you try to access a private variable of a class from outside the class?', options: ['A. It will compile and run successfully', 'B. Compilation error', 'C. Runtime error', 'D. Throws an exception'], answer: 1 },
+            { q: 'Which method is automatically called when an object is created in Java?', options: ['A. start()', 'B. init()', 'C. constructor', 'D. finalize()'], answer: 2 },
+            { q: 'What is the default value of a boolean variable in a Java class?', options: ['A. true', 'B. false', 'C. null', 'D. undefined'], answer: 1 },
+            { q: 'What is the output of the following code? int[] arr = new int[5]; System.out.println(arr[2]);', options: ['A. 0', 'B. null', 'C. undefined', 'D. Compilation error'], answer: 0 },
+            { q: 'Which of the following statements about constructors in Java is true?', options: ['A. They can return values', 'B. They can be inherited', 'C. They initialize objects', 'D. They must be private'], answer: 2 },
+            { q: 'In Java, which statement about interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about inheritance is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about polymorphism is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about loop is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about array is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 0 },
+            { q: 'In Java, which statement about class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about object is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about encapsulation is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about abstraction is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about constructor is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about garbage collection is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about package is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about import is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about variable is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about final is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about static is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about public is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about private is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about protected is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about default is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about break is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about continue is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about if is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about else is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about while is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about do-while is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about for is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about string is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about arraylist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about hashmap is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about treeset is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about linkedlist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stack is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about queue is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about set is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about list is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about map is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception handling is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about try-catch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about finally is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about synchronized is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about volatile is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about transient is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about native is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about strictfp is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about assert is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about enum is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about default method is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lambda is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about functional interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method reference is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stream is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about optional is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about module is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about jshell is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about records is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about sealed classes is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about instanceof pattern matching is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about text blocks is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about local-variable type inference is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about private interface methods is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about diamond operator is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about try-with-resources is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about multi-catch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about safe varargs is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about strings in switch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about numeric literals with underscores is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about binary literals is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about generics is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about wildcard is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about bounded type parameter is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about type erasure is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about collection framework is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about iterators is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about comparable and comparator is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about serialization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about externalization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about classpath is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about JVM architecture is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about JIT compiler is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about classloader is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about heap memory is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stack memory is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method area is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about exception handling is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about checked exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about unchecked exception is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about error is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread life cycle is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread synchronization is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about inter-thread communication is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about deadlock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about daemon thread is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about thread pool is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about executors framework is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about futures is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about callable and future is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent collections is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent hashmap is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about concurrent arraylist is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about atomic variables is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lock interface is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about reentrantlock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about readwritelock is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about semaphores is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about countdownlatch is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about cyclicbarrier is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about phaser is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about stream api is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about functional interfaces is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about lambda expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about method references is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about optional class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about module system is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about records class is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about sealed types is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about text blocks is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about switch expressions is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 },
+            { q: 'In Java, which statement about pattern matching for instanceof is correct?', options: ['A. It defines a data structure', 'B. It cannot be extended', 'C. It provides runtime behavior', 'D. It has no effect at runtime'], answer: 2 }
         ];
-        const totalQuestions = questions.length;
 
+        // --- Global State ---
+        let currentQuestionIndex = 0;
+        let answers = new Array(allQuestions.length).fill(null); // Stores user's selected index (0-3) or null
+        let score = 0;
 
-        // DOM Elements
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const quizContainer = document.getElementById('quiz-container');
-        const userIdSpan = document.getElementById('user-id');
-        const highScoreSpan = document.getElementById('high-score');
-        const questionText = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const feedbackMessage = document.getElementById('feedback-message');
-        const nextButton = document.getElementById('next-button');
-        const prevButton = document.getElementById('prev-button');
-        const endButton = document.getElementById('end-button');
-        const restartButton = document.getElementById('restart-button');
-        const resultsScreen = document.getElementById('results-screen');
-        const finalScoreDisplay = document.getElementById('final-score');
-        const scoreUpdateMessage = document.getElementById('score-update-message');
-        const questionsAttendedDisplay = document.getElementById('questions-attended');
+        // Total number of questions
+        const TOTAL_QUESTIONS = allQuestions.length;
 
-        // New Jump Elements
+        // --- DOM Elements ---
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
         const jumpInput = document.getElementById('jump-input');
         const jumpButton = document.getElementById('jump-button');
-        const jumpFeedback = document.getElementById('jump-feedback');
+
+        // Update the max value for the jump input
+        jumpInput.max = TOTAL_QUESTIONS;
+        jumpInput.placeholder = `Go to Q# (1-${TOTAL_QUESTIONS})`;
+
+        // --- Core Functions ---
 
         /**
-         * Converts base64 to an ArrayBuffer. (Utility required by platform)
+         * Renders the current question and its options.
          */
-        const base64ToArrayBuffer = (base64) => {
-            const binary_string = window.atob(base64);
-            const len = binary_string.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary_string.charCodeAt(i);
-            }
-            return bytes.buffer;
+        function renderQuestion() {
+            const qData = allQuestions[currentQuestionIndex];
+            const userAnswer = answers[currentQuestionIndex];
+
+            // 1. Update Question Number
+            questionNumberEl.textContent = `Q${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS}`;
+            questionTextEl.textContent = qData.q;
+
+            // 2. Clear and Render Options
+            optionsContainerEl.innerHTML = '';
+            qData.options.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.dataset.index = index;
+                button.classList.add('option-button'); // Use custom class
+
+                // Base styling
+                let classes = 'w-full option-button rounded-lg border-2 font-medium shadow-sm';
+
+                if (userAnswer !== null) {
+                    // Question has been answered, apply feedback colors
+                    if (index === qData.answer) {
+                        // Correct Answer (Green)
+                        classes += ' bg-green-500 border-green-600 text-white shadow-lg';
+                    } else if (index === userAnswer && index !== qData.answer) {
+                        // User's Wrong Answer (Red)
+                        classes += ' bg-red-500 border-red-600 text-white shadow-lg';
+                    } else {
+                        // Unselected neutral option
+                        classes += ' bg-white border-gray-200 text-gray-700 opacity-60';
+                    }
+                    button.disabled = true; // Disable if already answered
+                } else {
+                    // Not yet answered, allow selection
+                    classes += ' bg-white border-gray-300 hover:bg-gray-100 text-gray-800 cursor-pointer';
+                    button.onclick = () => selectAnswer(index);
+                }
+
+                button.className = classes; // Apply all accumulated classes
+                optionsContainerEl.appendChild(button);
+            });
+
+            // 3. Update Navigation Buttons
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === (TOTAL_QUESTIONS - 1);
+
+            // 4. Update Feedback Area
+            updateScoreAndFeedback(userAnswer);
         }
 
         /**
-         * Initializes Firebase and authenticates the user.
+         * Handles the user selecting an answer.
+         * @param {number} selectedIndex The index of the selected option (0-3).
          */
-        const initializeFirebase = async () => {
-            try {
-                setLogLevel('debug'); // Enable Firebase logging
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+        function selectAnswer(selectedIndex) {
+            if (answers[currentQuestionIndex] !== null) return; // Prevent double-clicking
 
-                // Use the custom token if provided, otherwise sign in anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
+            const qData = allQuestions[currentQuestionIndex];
+            answers[currentQuestionIndex] = selectedIndex;
+
+            // Recalculate score from scratch for robustness
+            score = answers.filter((ans, i) => ans !== null && ans === allQuestions[i].answer).length;
+
+            // Rerender to show colors and feedback
+            renderQuestion();
+        }
+
+        /**
+         * Updates the score and the text feedback area.
+         * @param {number|null} userAnswer The index of the user's answer for the current question.
+         */
+        function updateScoreAndFeedback(userAnswer) {
+            const qData = allQuestions[currentQuestionIndex];
+            const totalAnswered = answers.filter(a => a !== null).length;
+            
+            // 1. Update Header Score
+            scoreDisplayEl.textContent = `Score: ${score} / ${totalAnswered} Answered`;
+
+            // 2. Update Feedback Message
+            if (userAnswer !== null) {
+                if (userAnswer === qData.answer) {
+                    feedbackMessageEl.textContent = `Correct! (Current Score: ${score} / ${TOTAL_QUESTIONS})`;
+                    feedbackMessageEl.className = 'font-semibold text-green-600';
                 } else {
-                    await signInAnonymously(auth);
+                    feedbackMessageEl.textContent = `Wrong! Correct answer highlighted in green. (Current Score: ${score} / ${TOTAL_QUESTIONS})`;
+                    feedbackMessageEl.className = 'font-semibold text-red-600';
                 }
-
-                // Set up auth state change listener
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        userIdSpan.textContent = userId;
-                        isAuthReady = true;
-                        await loadScore();
-                        loadingOverlay.classList.add('hidden');
-                        quizContainer.classList.remove('hidden');
-                        displayQuestion();
-                    } else {
-                        // User is signed out. We ensure a user (anonymous or otherwise) is always active.
-                        userId = crypto.randomUUID(); // Fallback to random ID if anonymous sign-in failed
-                        userIdSpan.textContent = userId;
-                        isAuthReady = true;
-                        loadingOverlay.classList.add('hidden');
-                        quizContainer.classList.remove('hidden');
-                        displayQuestion();
-                    }
-                });
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                loadingOverlay.innerHTML = `<div class="text-xl font-semibold text-red-600">Failed to load quiz. Check console for errors.</div>`;
-                // Proceed with quiz display even if Firebase fails, using a fallback ID
-                userId = crypto.randomUUID();
-                userIdSpan.textContent = userId;
-                isAuthReady = true;
-                loadingOverlay.classList.add('hidden');
-                quizContainer.classList.remove('hidden');
-                displayQuestion();
-            }
-        };
-
-        /**
-         * Loads the user's high score from Firestore.
-         */
-        const loadScore = async () => {
-            if (!db || !isAuthReady || !userId) return;
-            const scoreDocRef = doc(db, `artifacts/${appId}/users/${userId}/quiz_scores/high_score`);
-            try {
-                const docSnap = await getDoc(scoreDocRef);
-                if (docSnap.exists()) {
-                    highscore = docSnap.data();
-                    highScoreSpan.textContent = `${highscore.score} / ${highscore.total}`;
-                } else {
-                    highScoreSpan.textContent = '0 / 0';
-                }
-            } catch (e) {
-                console.warn("Could not load high score:", e);
-                highScoreSpan.textContent = '0 / 0 (Local)';
-            }
-        };
-
-        /**
-         * Saves the user's current score if it's a new high score.
-         */
-        const saveScore = async (currentScore, currentTotal) => {
-            if (!db || !isAuthReady || !userId) {
-                console.warn("Firestore not ready. Score not saved.");
-                scoreUpdateMessage.textContent = "Score not saved (App not initialized).";
-                return;
-            }
-
-            const isNewHighScore = currentScore > highscore.score || (currentScore === highscore.score && currentTotal > highscore.total);
-
-            if (isNewHighScore) {
-                highscore.score = currentScore;
-                highscore.total = currentTotal;
-                const scoreDocRef = doc(db, `artifacts/${appId}/users/${userId}/quiz_scores/high_score`);
-
-                try {
-                    await setDoc(scoreDocRef, highscore, { merge: true });
-                    highScoreSpan.textContent = `${highscore.score} / ${highscore.total}`;
-                    scoreUpdateMessage.textContent = "🎉 New High Score Saved! 🎉";
-                } catch (e) {
-                    console.error("Error saving high score:", e);
-                    scoreUpdateMessage.textContent = "Error saving high score. (Check console)";
-                }
+                feedbackMessageEl.classList.remove('hidden');
             } else {
-                scoreUpdateMessage.textContent = `Current High Score: ${highscore.score} / ${highscore.total}`;
+                feedbackMessageEl.classList.add('hidden');
+                feedbackMessageEl.textContent = '';
             }
-        };
+        }
 
         /**
-         * Displays the current question and its options.
+         * Navigates to the next question.
          */
-        const displayQuestion = () => {
-            if (currentQuestionIndex >= totalQuestions) {
-                showResults();
-                return;
+        function nextQuestion() {
+            if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
             }
-
-            // Reset UI for new question
-            answered = false;
-            feedbackMessage.textContent = `Score: ${score} / ${questionsAttended}`;
-            feedbackMessage.className = 'text-lg font-bold h-6 mb-4 md:mb-0 text-gray-700';
-            nextButton.disabled = true;
-            nextButton.classList.add('opacity-50');
-            endButton.disabled = true;
-            endButton.classList.add('opacity-50');
-            optionsContainer.innerHTML = '';
-            resultsScreen.classList.add('hidden');
-            document.getElementById('question-area').classList.remove('hidden');
-            nextButton.classList.remove('hidden');
-            prevButton.classList.remove('hidden');
-            endButton.classList.remove('hidden'); // End quiz button is always visible
-            restartButton.classList.add('hidden');
-
-            // Handle button visibility
-            prevButton.disabled = currentQuestionIndex === 0;
-            prevButton.classList.toggle('opacity-50', currentQuestionIndex === 0);
-            if (currentQuestionIndex === totalQuestions - 1) {
-                nextButton.classList.add('hidden');
-            } else {
-                nextButton.classList.remove('hidden');
-            }
-
-
-            const currentQ = questions[currentQuestionIndex];
-            questionText.innerHTML = `<span class="text-indigo-600">${currentQuestionIndex + 1} / ${totalQuestions}:</span> ${currentQ.question}`;
-
-            // Create buttons for options
-            const optionsKeys = Object.keys(currentQ.options);
-            optionsKeys.forEach(key => {
-                const button = document.createElement('button');
-                button.textContent = `${key}. ${currentQ.options[key]}`;
-                button.dataset.answer = key;
-                button.className = 'option-button w-full text-left p-3 rounded-lg border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium hover:bg-indigo-50 hover:border-indigo-400 transition duration-150';
-                button.onclick = () => checkAnswer(button, key, currentQ.correctAnswer);
-                optionsContainer.appendChild(button);
-            });
-
-            // Clear jump feedback
-            jumpFeedback.textContent = '';
-        };
+        }
 
         /**
-         * Checks the user's selected answer.
+         * Navigates to the previous question.
          */
-        const checkAnswer = (selectedButton, selectedAnswer, correctAnswer) => {
-            if (answered) return;
-            answered = true;
-
-            // Highlight all options (correct one always shown) and disable them
-            Array.from(optionsContainer.children).forEach(btn => {
-                btn.disabled = true;
-                if (btn.dataset.answer === correctAnswer) {
-                    btn.classList.add('correct-answer');
-                } else if (btn.dataset.answer === selectedAnswer) {
-                    btn.classList.add('wrong-answer');
-                }
-                btn.classList.remove('hover:bg-indigo-50', 'hover:border-indigo-400');
-            });
-
-            questionsAttended++; // Increment attended questions count
-
-            if (selectedAnswer === correctAnswer) {
-                score++;
-                feedbackMessage.textContent = "✅ Correct!";
-                feedbackMessage.className = 'text-lg font-bold h-6 mb-4 md:mb-0 text-green-600';
-            } else {
-                feedbackMessage.textContent = "❌ Wrong! Correct answer highlighted in green.";
-                feedbackMessage.className = 'text-lg font-bold h-6 mb-4 md:mb-0 text-red-600';
-            }
-
-            // Update score display and enable Next/End button
-            feedbackMessage.textContent += ` (Current Score: ${score} / ${questionsAttended})`;
-            nextButton.disabled = false;
-            nextButton.classList.remove('opacity-50');
-            endButton.disabled = false;
-            endButton.classList.remove('opacity-50');
-        };
-
-        const prevQuestion = () => {
+        function prevQuestion() {
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;
-                displayQuestion();
+                renderQuestion();
             }
-        };
+        }
 
         /**
-         * Advances the quiz to the next question.
+         * Jumps to a specific question number (1-indexed).
          */
-        const nextQuestion = () => {
-            currentQuestionIndex++;
-            displayQuestion();
-        };
+        function goToQuestion() {
+            const targetQ = parseInt(jumpInput.value, 10);
 
-        /**
-         * Handles jumping to a specific question number (1-based).
-         */
-        const jumpToQuestion = () => {
-            const inputVal = parseInt(jumpInput.value, 10);
-
-            if (isNaN(inputVal) || inputVal < 1 || inputVal > totalQuestions) {
-                jumpFeedback.textContent = `Invalid number. Must be 1 to ${totalQuestions}.`;
-                return;
+            if (targetQ >= 1 && targetQ <= TOTAL_QUESTIONS) {
+                currentQuestionIndex = targetQ - 1;
+                renderQuestion();
+                jumpInput.value = ''; // Clear input after successful jump
+            } else {
+                // Flash the input red for invalid input (instead of alert)
+                jumpInput.placeholder = `Invalid! (1 to ${TOTAL_QUESTIONS})`;
+                jumpInput.classList.add('border-red-500', 'text-red-500');
+                setTimeout(() => {
+                    jumpInput.placeholder = `Go to Q# (1-${TOTAL_QUESTIONS})`;
+                    jumpInput.classList.remove('border-red-500', 'text-red-500');
+                }, 1500);
             }
-
-            // Convert 1-based index (user input) to 0-based index (array)
-            currentQuestionIndex = inputVal - 1;
-            // When jumping, reset score if jumping far away or starting new
-            if (currentQuestionIndex !== 0) {
-                // Option: Clear score on jump to focus on testing, or keep it. Keeping it for now.
-                // If you want to clear score: score = 0;
-            }
-            displayQuestion();
-        };
-
+        }
 
         /**
-         * Displays the final score screen and saves the score.
+         * Ends the quiz and shows final results.
          */
-        const showResults = () => {
-            document.getElementById('question-area').classList.add('hidden');
-            nextButton.classList.add('hidden');
-            prevButton.classList.add('hidden');
-            endButton.classList.add('hidden');
-            feedbackMessage.classList.add('hidden');
+        function endQuiz() {
+            const totalAnswered = answers.filter(a => a !== null).length;
+            const unanswered = TOTAL_QUESTIONS - totalAnswered;
+            
+            const message = `Your Final Score is: ${score} / ${TOTAL_QUESTIONS}\n\nYou answered ${totalAnswered} questions and got ${score} correct.\n\n${unanswered > 0 ? `You skipped ${unanswered} questions.` : 'All questions were answered!'}`;
 
-            resultsScreen.classList.remove('hidden');
-            restartButton.classList.remove('hidden');
-            finalScoreDisplay.textContent = `${score} / ${questionsAttended}`;
-            questionsAttendedDisplay.textContent = questionsAttended;
+            questionTextEl.textContent = message;
+            questionNumberEl.textContent = 'Quiz Summary';
+            optionsContainerEl.innerHTML = `
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner text-center">
+                    <p class="text-xl font-bold text-gray-800 mb-2">Quiz Complete!</p>
+                    <p class="text-gray-600">${message.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+            
+            feedbackMessageEl.classList.add('hidden');
 
-            // Check and save high score
-            saveScore(score, questionsAttended);
-        };
 
-        /**
-         * Resets the quiz state and starts a new game.
-         */
-        const restartGame = () => {
-            currentQuestionIndex = 0;
-            score = 0;
-            questionsAttended = 0;
-            resultsScreen.classList.add('hidden');
-            feedbackMessage.classList.remove('hidden');
-            displayQuestion();
-        };
+            // Disable all main buttons except the Restart button (which replaces Next)
+            [prevBtn, endQuizBtn, jumpButton].forEach(btn => btn.disabled = true);
 
-        // Event Listeners
-        nextButton.addEventListener('click', nextQuestion);
-        prevButton.addEventListener('click', prevQuestion);
-        endButton.addEventListener('click', showResults);
-        restartButton.addEventListener('click', restartGame);
-        jumpButton.addEventListener('click', jumpToQuestion); // Attach jump handler
+            // Set up restart button
+            nextBtn.textContent = 'Restart Quiz';
+            nextBtn.classList.remove('bg-indigo-600');
+            nextBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            nextBtn.disabled = false;
+            nextBtn.onclick = () => {
+                location.reload(); // Simple refresh to restart the state
+            };
+        }
 
-        // Start the application
-        window.onload = initializeFirebase;
+        // --- Event Listeners ---
+        prevBtn.onclick = prevQuestion;
+        nextBtn.onclick = nextQuestion;
+        jumpButton.onclick = goToQuestion;
+        endQuizBtn.onclick = endQuiz;
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for Firebase to (try to) initialize before starting the app loop
+            const checkInit = setInterval(() => {
+                if (window.app_initialized) {
+                    clearInterval(checkInit);
+                    renderQuestion();
+                }
+            }, 100);
+        });
 
     </script>
-    
 </body>
-
 </html>
